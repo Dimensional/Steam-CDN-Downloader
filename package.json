@@ -1,0 +1,27 @@
+{
+  "name": "steam-cdn-downloader",
+  "version": "1.0.0",
+  "description": "Used to download Steam CDN chunks that belong to the user.",
+  "main": "getallapps.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "steam",
+    "steam cdn",
+    "no-intro"
+  ],
+  "author": "TechnoMage",
+  "license": "ISC",
+  "dependencies": {
+    "@doctormckay/stdlib": "^2.10.0",
+    "@doctormckay/steam-crypto": "^1.2.0",
+    "adm-zip": "^0.5.12",
+    "bytebuffer": "^5.0.1",
+    "dotenv": "^16.4.5",
+    "lzma": "^2.3.2",
+    "steam-totp": "^2.1.2",
+    "steam-user": "^5.0.9",
+    "uniqs": "^2.0.0"
+  }
+}
