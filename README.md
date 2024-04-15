@@ -64,22 +64,22 @@ How Steam Depots work:
 manifestDepotDownloaderv1:
 
 | Successfully was able to download manifest data, decompressed into a JSON record, which was then processed to decrypt the names of the files that
-| would be the end result of a normal install. The issue with this version was that it would make multiple download connections over the short period of time.
-| This lead to issues where sometimes a connection could become unstable and lock up, with the connection queue filled up.
+ would be the end result of a normal install. The issue with this version was that it would make multiple download connections over the short period of time.
+ This lead to issues where sometimes a connection could become unstable and lock up, with the connection queue filled up.
 
 manifestDepotDownloaderv2:
 
 | This solved the issue if the number of requests by slowing them down and included an internal method of preventing a file from being saved if it was corrupted.
-| However there was another problem to address, and that was it didn't check if a Chunk was already downloaded. As such, if one were to download a Multi-Gigabyte
-| game, and had something interfere with the download, forcing it to quit when you're at 99% downloaded, you would end up restarting from the very beginning.
-| This was a waste of bandwidth and time.
+ However there was another problem to address, and that was it didn't check if a Chunk was already downloaded. As such, if one were to download a Multi-Gigabyte
+ game, and had something interfere with the download, forcing it to quit when you're at 99% downloaded, you would end up restarting from the very beginning.
+ This was a waste of bandwidth and time.
 
 manifestDepotDownloaderv3:
 
 | Solved the issue of redownloading already downloaded files. It would check if the files exist, and using the same validator from before, it can be used to check if
-| the chunk that is already downloaded wasn't corrupted in any way. The validation would decrypt the chunk using a depot key, then unzip it. If it failed to unzip, as
-| decrypting was likely never to fail, it would flag the file as corrupt and delete, then redownload it. Furthermore, this method of validation, should it successfully unzip,
-| would get an SHA1 checksum of this decrypted/unzipped data, and compare it to the file name. If those matched, it would skip on to the next file. If they didn't,
-| then the chunk would be redownloaded.
+ the chunk that is already downloaded wasn't corrupted in any way. The validation would decrypt the chunk using a depot key, then unzip it. If it failed to unzip, as
+ decrypting was likely never to fail, it would flag the file as corrupt and delete, then redownload it. Furthermore, this method of validation, should it successfully unzip,
+ would get an SHA1 checksum of this decrypted/unzipped data, and compare it to the file name. If those matched, it would skip on to the next file. If they didn't,
+ then the chunk would be redownloaded.
 
 manifestDepotDownloaderv4: TODO
