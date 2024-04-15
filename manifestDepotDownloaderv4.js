@@ -113,19 +113,9 @@ user.on('loggedOn', async () => {
 	// the depot decryption key as well as the manifest request code. Retrieving the manifest request code is actually
 	// the only reason we need to pass the branch name and password to getManifest,
 	console.log('Downloading manifest');
-	let manifestRaw = await user.getRawManifest(APP_ID, DEPOT_ID, ManifestId, branchID, BRANCH_PASSWORD);
-
-	// These are left over for testing each step. Can be deleted
-	//const manifestObj = JSON.parse(manifestRaw);
-	//const manifestString = manifestObj.manifest;
-	//console.log(manifestRaw.manifest.buffer);
-
-
-	// Below is where we grab the manifest buffer and saw the raw
-	// manifest to a binary file. This is compressed and encoded.
-	let arrayBuffer = manifestRaw.manifest.buffer;
-	let buffer = Buffer.from(arrayBuffer);
-	//console.log(buffer);
+	let manifestRaw = await getRawManifest1(APP_ID, DEPOT_ID, ManifestId, branchID, BRANCH_PASSWORD);
+	let zippedBuffer = Buffer.from(manifestRaw.data);
+	//console.log(JSON.stringify(unZippedManifest));
 
 	// Forbidden Names must be Purged!!!!
 	// Windows hates certain characters in file and folder names.
@@ -135,11 +125,21 @@ user.on('loggedOn', async () => {
 	let filename = `${appName}_${DEPOT_ID}_manifest_${branchID}_${ManifestId}`;
 	let dir = `./${appName}`;
 	fs.mkdirSync(dir, {recursive: true});
-	fs.writeFileSync(`${dir}/${filename}.bin`, buffer);
+	fs.writeFileSync(`${dir}/${filename}.bin`, zippedBuffer);
+
+	// These are left over for testing each step. Can be deleted
+	//const manifestObj = JSON.parse(manifestRaw);
+	//const manifestString = manifestObj.manifest;
+	//console.log(manifestRaw.manifest.buffer);
+
+	// Below is where we grab the manifest buffer and saw the raw
+	// manifest to a binary file. This is compressed and encoded.
+	let unZippedManifest = await unzip(manifestRaw.data);
+	//console.log(buffer);
 
 	// Next, we are decompressing/decrypting the format to JSON for parsing.
 	// This is without file names being decrypted. That is handled later.
-	let manifestParsed = ContentManifest.parse(Buffer.from(manifestRaw.manifest));
+	let manifestParsed = ContentManifest.parse(Buffer.from(unZippedManifest));
 	//console.log(JSON.stringify(manifestParsed));
 	//fs.writeFileSync(`./${appName}_manifest_${ManifestId}_encryptedFileNames.json`, JSON.stringify(manifestParsed, undefined, '\t'));
 
@@ -439,3 +439,72 @@ function createJunction(targetPath, junctionPath) {
         //console.log('Junction created successfully');
     });
 } */
+
+/**
+ * Download and decompress a manifest, but don't parse it into a JavaScript object.
+ * @param {int} appID
+ * @param {int} depotID
+ * @param {string} manifestID
+ * @param {string} branchName - Now mandatory. Use 'public' for a the public build (i.e. not a beta)
+ * @param {string} [branchPassword]
+ * @param {function} [callback]
+ */
+function getRawManifest1(appID, depotID, manifestID, branchName, branchPassword, callback) {
+	if (typeof branchName == 'function') {
+		callback = branchName;
+		branchName = null;
+	}
+
+	if (typeof branchPassword == 'function') {
+		callback = branchPassword;
+		branchPassword = null;
+	}
+
+	return StdLib.Promises.callbackPromise(['manifest'], callback, async (resolve, reject) => {
+		let {servers} = await user.getContentServers(appID);
+		let server = servers[Math.floor(Math.random() * servers.length)];
+
+		/***Not worth flipping comments on the following 2 variables.
+		 * Manifests have a required token that changes every 5 minutes.
+		 * This causes a new file to be saved to LanCache instead of reusing the old one,
+		 * needlessly increasing file storage if one is being used.
+		 * */
+		let urlBase = (server.https_support == 'mandatory' ? 'https://' : 'http://') + server.Host;
+		//let urlBase = 'http://lancache.steamcontent.com';
+
+		let vhost = server.vhost || server.Host;
+
+		let token = '';
+		if (server.usetokenauth == 1) {
+			// Only request a CDN auth token if this server wants one.
+			// I'm not sure that any servers use token auth anymore, but in case there's one out there that does,
+			// we should still try.
+			token = (await this.getCDNAuthToken(appID, depotID, vhost)).token;
+		}
+
+		if (!branchName) {
+			this._warn(`No branch name was specified for app ${appID}, depot ${depotID}. Assuming "public".`);
+			branchName = 'public';
+		}
+
+		let {requestCode} = await user.getManifestRequestCode(appID, depotID, manifestID, branchName, branchPassword);
+		let manifestRequestCode = `/${requestCode}`;
+
+		let manifestUrl = `${urlBase}/depot/${depotID}/manifest/${manifestID}/5${manifestRequestCode}${token}`;
+		download(manifestUrl, vhost, async (err, res) => {
+			if (err) {
+				return reject(err);
+			}
+
+			if (res.type != 'complete') {
+				return;
+			}
+
+			try {
+				return resolve(res);
+			} catch (ex) {
+				return reject(ex);
+			}
+		});
+	});
+}
