@@ -23,7 +23,7 @@ You need to have NodeJS installed on your machine in order for this to be used. 
    - It will remove anything that isn't a proper depot, then save all of your apps and depot data to a single file.
    - If you enable Debugging by changing one variable, it will save each app data on separate JSON files. Makes for easier reading if needed.
 
-3rd File: manifestDepotDownloader*.js (Currently on Version 3 of the Downloader. Version 4 is being worked on.)
+3rd File: manifestDepotDownloader*.js (Currently on Version 3 of the Downloader. Version 4 is being worked on but is usable.)
  - This does the meat of the workd downloading the CDN Chunks and Manifest.
  - You must specify the app and depot by their ID.
  - By default, it looks at the Public Branch of your app's depot, and grabs the latest Manifest.
