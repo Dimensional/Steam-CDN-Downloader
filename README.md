@@ -82,4 +82,7 @@ manifestDepotDownloaderv3:
  would get an SHA1 checksum of this decrypted/unzipped data, and compare it to the file name. If those matched, it would skip on to the next file. If they didn't,
  then the chunk would be redownloaded.
 
-manifestDepotDownloaderv4: TODO
+manifestDepotDownloaderv4: WIP, Usable.
+
+| Changed how the Manifest is downloaded. Previously it was unzippped before it was saved. This resulted in a binary file that was larger than what was truly downloaded.
+The change made now saves the Manifest file before it is decompressed and processed into a JSON file. Depot downloading is unaffected.
