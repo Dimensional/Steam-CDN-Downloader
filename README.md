@@ -42,3 +42,19 @@ You need to have NodeJS installed on your machine in order for this to be used. 
    - Furthermore, there is a check where the downloader first checks to see if the chunk exists already and isn't corrupted.
      - If it's corrupted, deletes the file and redownloads.
      - If not corrupted, skips that file and goes to the next to check and/or download.
+
+----------------------------
+
+How Steam Depots work:
+  Steam stores all of it's app files on CDN servers in Depot folders. These Depot folders go based on a Unique ID that is separate from App IDs.
+  No 2 games will ever have the same Depot ID for their own separate data. If they use the same ID, then one game will 'own' that depot, and it is
+  shared with the other game. This is the same with anything else on Steam, like DLC, Music, Tools, Servers, etc.
+
+  Every CDN Chunk for that app's Depot will go into that folder, regardless of version. This means even updates will have their CDN Chunks stored there.
+  As such, when downloading CDN Chunks for one version of the game or app, you may end up with a Chunk that is also used in another version, since updates
+  don't change every file.
+  CDN Chunks are the result of individual files for the app that get split up and compressed into chunks no bigger than 1MB in size. No chunk will store
+  2 files, either as a whole in in parts.
+
+  Given how the depot files are all shared between versions of the apps, known as Manifests and Branches, these chunks can be saved in a central location,
+  and the manifest can be used to select which files to DAT.
