@@ -27,6 +27,8 @@ require('dotenv').config()
 const STEAM_ACCOUNT_NAME = process.env.STEAM_ACCOUNT_NAME ?? 'user';         // Username for your Steam account
 const STEAM_ACCOUNT_PASSWORD = process.env.STEAM_ACCOUNT_PASSWORD ?? 'password'; // Password for your Steam account
 const STEAM_ACCOUNT_2FA_SECRET = '';       // Your shared_secret if you have mobile authentication enabled, or blank to prompt for a code from stdin
+
+// DO NOT SHARE THIS TOKEN!!!
 const STEAM_REFRESH_TOKEN = './refreshToken.config';
 
 const SteamUser = require('steam-user'); // change to `require('steam-user')` if running outside of the examples directory
